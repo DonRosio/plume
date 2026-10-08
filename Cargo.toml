@@ -1,0 +1,44 @@
+[package]
+name = "plume"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+description = "Fenêtre native légère pour l'application web officielle de Discord (WebView2, sans Electron)."
+publish = false
+
+# Pure Rust, platform-independent: the security policy (unit-tested everywhere).
+[dependencies]
+url = "2"
+
+# The window itself only exists on Windows (WebView2).
+[target.'cfg(windows)'.dependencies]
+wry = "0.57"
+tao = "0.37"
+tray-icon = "0.26"
+# Must match the versions used by wry so the COM types are the same.
+webview2-com = "0.39"
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# Icon + version info embedded in plume.exe (Windows builds only, see build.rs).
+[build-dependencies]
+winresource = "0.1"
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "warn"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+# Abort instead of unwinding: no unwinding through COM callbacks.
+panic = "abort"

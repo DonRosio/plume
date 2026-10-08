@@ -1,0 +1,83 @@
+# Builds plume.exe on GitHub's Windows servers.
+#   - every push / pull request: checks (fmt, clippy, tests, dependency audit) + build;
+#     the exe and its SHA-256 are downloadable from the run's "Artifacts".
+#   - tag `v*` (e.g. v0.2.0): same, plus a GitHub Release with a signed build-provenance
+#     attestation (verify with `gh attestation verify plume.exe --repo <owner>/<repo>`).
+#
+# Every third-party action is pinned to a full commit SHA (the comment gives the tag): a
+# moved or hijacked tag cannot change what runs here.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write # create the release (tags only)
+      id-token: write # sign the attestation (tags only)
+      attestations: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2
+        with:
+          tool: cargo-audit
+
+      # One command per step: in PowerShell a failing command in the middle of a multi-line
+      # step would not fail the step.
+      - name: Format
+        run: cargo fmt --check
+      - name: Lint
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --locked
+      - name: Dependency audit
+        run: cargo audit
+
+      - name: Build
+        run: cargo build --release --locked
+
+      - name: SHA-256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash target/release/plume.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  plume.exe" | Out-File -Encoding ascii target/release/plume.exe.sha256
+          Write-Host "SHA-256: $hash"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: plume-${{ github.sha }}
+          path: |
+            target/release/plume.exe
+            target/release/plume.exe.sha256
+          if-no-files-found: error
+
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: target/release/plume.exe
+
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          files: |
+            target/release/plume.exe
+            target/release/plume.exe.sha256
