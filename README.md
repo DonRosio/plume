@@ -191,6 +191,30 @@ WebView2 se met à jour avec Windows, et l'application web de Discord à chaque 
 lui-même, récupérez la nouvelle Release GitHub (ou recompilez après `cargo audit`). Il n'y a
 volontairement aucune mise à jour automatique, donc aucun canal de mise à jour à pirater.
 
+## Démarche
+
+Ce projet est né d'un besoin concret : réduire la mémoire consommée par Discord sur mon PC de jeu,
+pendant mes parties de League of Legends en vocal avec mes amis.
+
+Je l'ai conçu et piloté, et je l'ai développé avec l'assistance de **Claude** (Anthropic), utilisé
+comme binôme de programmation. Mon rôle :
+
+- **Définir le besoin et les exigences** : une alternative plus légère que Discord desktop, utilisable
+  avec mon compte existant, et le plus sécurisée possible.
+- **Arbitrer les choix d'architecture.** J'ai d'abord exploré un client entièrement natif, écarté parce
+  qu'il aurait enfreint les conditions d'utilisation de Discord et exposé mon compte. J'ai comparé
+  ensuite plusieurs voies (navigateur, client tiers existant, fenêtre WebView2) avant de retenir
+  WebView2 pour Windows, qui garde les appels vocaux.
+- **Fixer les compromis** : sécurité jamais sacrifiée à la performance, mode éco optionnel plutôt
+  qu'imposé, pas de démarrage automatique avec Windows, pas de rechargement automatique d'une page
+  qui ne répond plus (pour ne pas couper un appel en pleine partie).
+- **Valider sur ma machine Windows** : compilation, fonctionnement, mesures de consommation.
+
+Le code a été écrit avec Claude, puis vérifié : tests unitaires des règles de sécurité, analyse
+statique stricte (clippy), audit des dépendances, compilation et publication automatiques sur GitHub.
+Les principales failles relevées pendant les relectures ont été corrigées : pop-ups capables de
+remplacer la fenêtre, SmartScreen désactivé par défaut dans la bibliothèque wry, DLL piégées.
+
 ## Code
 
 | Fichier | Rôle |
