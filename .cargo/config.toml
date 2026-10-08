@@ -1,0 +1,9 @@
+# Static C runtime: plume.exe does not need the Visual C++ redistributable.
+# /DEPENDENTLOADFLAG:0x800 (LOAD_LIBRARY_SEARCH_SYSTEM32): the DLLs plume.exe imports are only
+# looked up in System32, never next to the exe — defeats DLL planting (e.g. a malicious
+# dwmapi.dll dropped in the Downloads folder). Same mitigation as Chrome and Edge.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/DEPENDENTLOADFLAG:0x800"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/DEPENDENTLOADFLAG:0x800"]
