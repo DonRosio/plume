@@ -111,15 +111,11 @@ PC n'a alors besoin ni de Rust ni des outils de Visual Studio (plusieurs Go).
 2. À chaque envoi, l'onglet **Actions** vérifie le code (format, lint, tests, audit des dépendances) et
    compile ; `plume.exe` et son empreinte SHA-256 sont téléchargeables dans « Artifacts ».
 3. Pour une version : créez une étiquette `v…` (par exemple `v0.2.0`). Une **Release** est publiée
-   avec `plume.exe`, son empreinte et une **attestation de provenance** signée par GitHub.
+   avec `plume.exe` et son empreinte SHA-256.
 
-Vérifier l'exécutable téléchargé (avec l'outil `gh` installé et connecté) :
-
-```powershell
-gh attestation verify plume.exe --repo VOTRE-COMPTE/plume
-```
-
-Ou comparer l'empreinte avec celle publiée :
+Vérifier l'exécutable téléchargé en comparant son empreinte avec le fichier `plume.exe.sha256` publié
+à côté (si le dépôt devient public, GitHub ajoute aussi une attestation de provenance, vérifiable avec
+`gh attestation verify plume.exe --repo DonRosio/plume`) :
 
 ```powershell
 (Get-FileHash plume.exe -Algorithm SHA256).Hash

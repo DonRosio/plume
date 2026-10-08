@@ -1,8 +1,8 @@
 # Builds plume.exe on GitHub's Windows servers.
 #   - every push / pull request: checks (fmt, clippy, tests, dependency audit) + build;
 #     the exe and its SHA-256 are downloadable from the run's "Artifacts".
-#   - tag `v*` (e.g. v0.2.0): same, plus a GitHub Release with a signed build-provenance
-#     attestation (verify with `gh attestation verify plume.exe --repo <owner>/<repo>`).
+#   - tag `v*` (e.g. v0.2.0): same, plus a GitHub Release (with a signed build-provenance
+#     attestation when the repository is public).
 #
 # Every third-party action is pinned to a full commit SHA (the comment gives the tag): a
 # moved or hijacked tag cannot change what runs here.
@@ -70,7 +70,9 @@ jobs:
             target/release/plume.exe.sha256
           if-no-files-found: error
 
-      - if: startsWith(github.ref, 'refs/tags/v')
+      # GitHub only offers attestations for public repositories (or organisation plans): on a
+      # private personal repo, integrity relies on the published SHA-256 instead.
+      - if: startsWith(github.ref, 'refs/tags/v') && !github.event.repository.private
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: target/release/plume.exe
