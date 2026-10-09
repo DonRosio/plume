@@ -108,8 +108,11 @@ Le fichier `.github/workflows/build.yml` fait compiler Plume par les serveurs Wi
 PC n'a alors besoin ni de Rust ni des outils de Visual Studio (plusieurs Go).
 
 1. Créez un dépôt **privé** sur GitHub (par exemple `plume`) et envoyez-y ce dossier.
-2. À chaque envoi, l'onglet **Actions** vérifie le code (format, lint, tests, audit des dépendances) et
-   compile ; `plume.exe` et son empreinte SHA-256 sont téléchargeables dans « Artifacts ».
+2. À chaque envoi, l'onglet **Actions** vérifie le code (format, lint, tests, audit des dépendances,
+   recherche de secrets dans tout l'historique) et compile ; `plume.exe` et son empreinte SHA-256
+   sont téléchargeables dans « Artifacts ». Chaque lundi, l'audit et la recherche de secrets
+   tournent aussi sans envoi : une vulnérabilité découverte entre-temps dans une dépendance fait
+   échouer le passage, et GitHub vous prévient par e-mail.
 3. Pour une version : créez une étiquette `v…` (par exemple `v0.2.0`). Une **Release** est publiée
    avec `plume.exe` et son empreinte SHA-256.
 
@@ -157,6 +160,10 @@ cargo install cargo-audit
 ```powershell
 cargo audit
 ```
+
+Pour contribuer : un hook refuse le commit si un secret est détecté ou si le code n'est pas formaté.
+Il demande [gitleaks](https://github.com/gitleaks/gitleaks#installing) et s'active une fois par
+clone avec `git config core.hooksPath .githooks`.
 
 ## Checklist de test
 
