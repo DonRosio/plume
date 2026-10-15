@@ -3,7 +3,8 @@ name = "plume"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.94"
-description = "Fenêtre native légère pour l'application web officielle de Discord (WebView2, sans Electron)."
+description = "Lightweight native window for Discord's official web app (WebView2, no Electron)."
+license = "MIT"
 publish = false
 
 # Pure Rust, platform-independent: the security policy (unit-tested everywhere).

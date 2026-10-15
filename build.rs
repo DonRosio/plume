@@ -15,7 +15,7 @@ fn main() {
             .set("LegalCopyright", "Plume n'est pas affilié à Discord");
         if let Err(err) = resource.compile() {
             panic!(
-                "impossible d'intégrer l'icône (rc.exe des outils C++ de Visual Studio requis) : {err}"
+                "cannot embed the icon (rc.exe from the Visual Studio C++ tools is required): {err}"
             );
         }
     }
