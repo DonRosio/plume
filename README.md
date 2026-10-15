@@ -1,157 +1,158 @@
 # Plume
 
-Fenêtre native et légère pour l'**application web officielle de Discord**, sous Windows.
-Écrite en Rust, elle affiche https://discord.com dans **WebView2**, le moteur Chromium intégré à
-Windows, au lieu d'embarquer son propre navigateur comme le fait Discord desktop (Electron).
+A lightweight native window for **Discord's official web app**, on Windows. Written in Rust, it
+displays https://discord.com in **WebView2**, the Chromium engine built into Windows, instead of
+bundling its own browser the way Discord desktop (Electron) does.
 
-Plume n'est pas affilié à Discord. La page n'est jamais modifiée : aucun script injecté, aucun mod.
+Plume is not affiliated with Discord. The page is never modified: no injected script, no mod.
 
-## Gains attendus (estimations à confirmer par vos propres mesures)
+The application itself is in French (its menus and messages); this documentation is in English.
+
+## Expected gains (estimates, to be confirmed by your own measurements)
 
 | | Discord desktop | Plume |
 |---|---|---|
-| Espace disque | ~1 Go | un seul `.exe` de quelques Mo (WebView2 est déjà dans Windows) |
-| Mémoire au quotidien | ~1 Go, davantage sur de longues sessions | ~350 à 500 Mo |
-| Fenêtre réduite | — | WebView2 passe en mode « mémoire basse » |
-| Démarrage | écran de chargement + mises à jour | direct |
+| Disk space | ~1 GB | a single `.exe` of a few MB (WebView2 is already part of Windows) |
+| Everyday memory | ~1 GB, more over long sessions | ~350 to 500 MB |
+| Minimised window | — | WebView2 switches to "low memory" mode |
+| Start-up | loading screen + updates | immediate |
 
-L'essentiel de la mémoire restante est consommé par l'application web de Discord elle-même.
+Most of the remaining memory is used by Discord's web app itself.
 
-### Ce que Plume fait pour consommer le moins possible
+### What Plume does to use as little as possible
 
-- **Fenêtre cachée ou réduite** : la page n'est plus dessinée (ni processeur ni carte graphique
-  dépensés pour rien) et WebView2 passe en mode mémoire basse. Messages, notifications et appels
-  continuent.
-- **Composants inutiles désactivés** : lecteur PDF et interface interne d'Edge.
-- **Mode éco, optionnel** : le mode « appareil peu puissant » de Chromium (caches réduits, rendu plus
-  économe, qualité visuelle parfois un peu moindre). À cocher dans le menu de l'icône (voir plus bas).
-- **Jamais au détriment de la sécurité** : isolation des sites, bac à sable et SmartScreen restent
-  actifs (un test l'impose).
+- **Hidden or minimised window**: the page is no longer drawn (no CPU or GPU wasted) and WebView2
+  switches to low-memory mode. Messages, notifications and calls keep working.
+- **Unneeded components disabled**: the PDF viewer and Edge's internal UI.
+- **Optional eco mode**: Chromium's "low-end device" mode (smaller caches, cheaper rendering, slightly
+  lower visual quality at times). Tick it in the tray icon's menu (see below).
+- **Never at the expense of security**: site isolation, the sandbox and SmartScreen stay on (a test
+  enforces it).
 
-### Ce que vous pouvez régler dans Discord (gains souvent les plus importants)
+### What you can tune in Discord itself (often the biggest gains)
 
-Paramètres utilisateur de Discord :
-- **Accessibilité** → activer « Réduire les animations » ; désactiver la lecture automatique des GIF,
-  les émojis animés et les stickers animés.
-- **Texte et images** → désactiver l'aperçu des liens si vous n'en avez pas besoin.
-- Quitter les serveurs très actifs que vous ne lisez plus : chaque serveur ouvert coûte de la mémoire.
+In Discord's user settings:
+- **Accessibility**: reduce motion, and turn off automatic GIF playback, animated emoji and
+  animated stickers.
+- **Text & Images**: turn off link previews if you do not need them.
+- Leave the very busy servers you no longer read: every open server costs memory.
 
-## Ce qui fonctionne, et les limites
+## What works, and the limits
 
-Messages, appels vocaux et vidéo, partage d'écran, notifications, glisser-déposer de fichiers.
+Messages, voice and video calls, screen sharing, notifications, drag-and-drop of files.
 
-Comme Discord, **la croix ne quitte pas** : Plume se cache dans la zone de notification (près de
-l'horloge) et continue de recevoir messages, notifications et appels. Un clic gauche sur l'icône
-rouvre la fenêtre ; clic droit → « Quitter » pour fermer vraiment. Pour que l'icône reste toujours
-visible : Paramètres Windows → Personnalisation → Barre des tâches → Autres icônes → activer Plume.
+Like Discord, **the close button does not quit**: Plume hides in the notification area (near the
+clock) and keeps receiving messages, notifications and calls. A left click on the icon reopens the
+window; right click → "Quitter" (Quit) to really close it. To keep the icon always visible: Windows
+Settings → Personalization → Taskbar → Other system tray icons → turn Plume on.
 
-**Menu de l'icône (clic droit)** : « Ouvrir Plume », **Mode éco**, **Mode éphémère**, « Redémarrer
-Plume pour appliquer », « Quitter ». Les deux modes sont mémorisés ; ils prennent effet au prochain
-démarrage de Plume, jamais en plein appel (le redémarrage n'est proposé, pas imposé). Les options
-`--eco` et `--ephemeral` en ligne de commande restent possibles et forcent le mode.
+**Tray icon menu (right click)**: "Ouvrir Plume" (Open), **"Mode éco"** (Eco mode), **"Mode
+éphémère"** (Ephemeral mode), "Redémarrer Plume pour appliquer" (Restart to apply), "Quitter" (Quit).
+Both modes are remembered; they take effect at the next start of Plume, never in the middle of a call
+(the restart is offered, not forced). The `--eco` and `--ephemeral` command-line options still work
+and force the mode.
 
-**Badge de mentions** : comme Discord, un badge rouge avec le nombre de mentions non lues apparaît sur
-l'icône de la barre des tâches et sur celle de la zone de notification. Plume lit seulement le titre de
-la page, où Discord indique déjà ce nombre.
+**Mentions badge**: like Discord, a red badge with the number of unread mentions appears on the
+taskbar icon and on the notification-area icon. Plume only reads the page's title, where Discord
+already shows that number.
 
-**Robustesse** : si le moteur de la page plante, elle est rechargée ; si WebView2 entier s'arrête, Plume
-redémarre. Sans réseau au lancement, Plume réessaie tout seul (5 s, 10 s, 20 s, 40 s, puis chaque
-minute). Une page qui ne répond plus n'est volontairement *pas* rechargée : pendant une partie, elle
-peut simplement manquer de processeur, et la recharger couperait l'appel.
+**Robustness**: if the page's engine crashes, the page is reloaded; if the whole of WebView2 stops,
+Plume restarts. Without a network at launch, Plume retries by itself (5 s, 10 s, 20 s, 40 s, then every
+minute). A page that stops responding is deliberately *not* reloaded: during a game it may simply be
+starved of CPU, and reloading it would cut the call.
 
-**Fenêtre** : taille, position et état agrandi sont mémorisés (si l'écran a été débranché, Plume
-revient à la position par défaut).
+**Window**: size, position and maximised state are remembered (if the screen was unplugged, Plume
+goes back to the default position).
 
-**Pour jouer** : en partie, c'est le jeu qui a le focus, donc le push-to-talk de Discord ne réagit
-pas. Utilisez la **détection de la voix** (Paramètres Discord → Voix et vidéo → Mode d'entrée).
-Fenêtre cachée ou réduite, Plume ne dessine plus rien : le jeu récupère processeur et carte graphique,
-l'appel continue.
+**For gaming**: while you play, the game has the focus, so Discord's push-to-talk does not react. Use
+**voice activity detection** instead (Discord settings → Voice & Video → Input Mode). With the
+window hidden or minimised, Plume draws nothing: the game gets its CPU and GPU back, and the call
+continues.
 
-Limites (ce sont celles de Discord dans un navigateur) :
-- le **push-to-talk** et les raccourcis ne marchent que lorsque la fenêtre est active ;
-- pas de détection des jeux ni d'overlay ;
-- les liaisons de comptes (Spotify, Twitch…) et les paiements s'ouvrent dans votre navigateur.
+Limits (they are those of Discord in a browser):
+- **push-to-talk** and shortcuts only work while the window is active;
+- no game detection, no overlay;
+- account links (Spotify, Twitch…) and payments open in your browser.
 
-## Sécurité
+## Security
 
-| Risque | Protection |
+| Risk | Protection |
 |---|---|
-| Une page piégée appelle du code de votre PC | Aucun pont page ↔ système : ni IPC, ni objets hôtes, ni messages web |
-| Hameçonnage dans une fenêtre sans barre d'adresse | Seul `https://discord.com` (domaine exact) s'affiche dans Plume ; tout autre site s'ouvre dans votre navigateur, où l'adresse est visible |
-| Pop-up qui remplace Discord (fausse page de consentement OAuth…) | Les pop-ups ne s'ouvrent jamais dans Plume, uniquement dans le navigateur (une par seconde au maximum) |
-| Lancement d'un programme via un lien (`ms-msdt:`, `search-ms:`, `file:`…) | Seuls `http` et `https` sont transmis au navigateur, tout le reste est bloqué |
-| Accès au micro, à la caméra… par un contenu intégré | Micro, caméra, notifications et lecture automatique accordés **uniquement** à `https://discord.com` ; tout le reste (géolocalisation, lecture du presse-papiers, fichiers…) est refusé ; décisions jamais mémorisées |
-| Téléchargement piégé | Seuls les fichiers des serveurs de Discord sont acceptés, et SmartScreen les vérifie |
-| Vol d'identifiants enregistrés | Enregistrement des mots de passe et remplissage automatique désactivés ; outils de développement désactivés |
-| DLL piégée à côté de l'exécutable | Les DLL dont dépend Plume ne sont cherchées que dans `System32`, jamais dans le dossier courant ni dans le `PATH` |
-| Faille du moteur web | WebView2 est maintenu et mis à jour automatiquement par Microsoft, souvent plus vite que le Chromium figé d'une application Electron |
-| Chaîne d'approvisionnement | 78 crates, versions figées (`Cargo.lock`), auditées avec `cargo audit` ; vous compilez vous-même |
+| A booby-trapped page calls code on your PC | No page ↔ system bridge: no IPC, no host objects, no web messages |
+| Phishing in a window without an address bar | Only `https://discord.com` (exact domain) is displayed in Plume; any other site opens in your browser, where the address is visible |
+| A pop-up that replaces Discord (fake OAuth consent page…) | Pop-ups never open in Plume, only in the browser (at most one per second) |
+| Launching a program through a link (`ms-msdt:`, `search-ms:`, `file:`…) | Only `http` and `https` are passed to the browser, everything else is blocked |
+| Microphone, camera… access by embedded content | Microphone, camera, notifications and autoplay are granted **only** to `https://discord.com`; everything else (geolocation, clipboard reading, files…) is denied; decisions are never remembered |
+| Booby-trapped download | Only files from Discord's servers are accepted, and SmartScreen checks them |
+| Theft of saved credentials | Password saving and autofill are disabled; developer tools are disabled |
+| Booby-trapped DLL next to the executable | The DLLs Plume depends on are only looked up in `System32`, never in the current folder or in the `PATH` |
+| Web engine flaw | WebView2 is maintained and updated automatically by Microsoft, often faster than an Electron application's frozen Chromium |
+| Supply chain | 78 crates, versions pinned (`Cargo.lock`), audited with `cargo audit`; you build it yourself |
 
-**Vos données** se trouvent dans `%LOCALAPPDATA%\Plume`, accessible uniquement à votre compte Windows.
-Supprimer ce dossier vous déconnecte complètement.
+**Your data** is in `%LOCALAPPDATA%\Plume`, readable only by your Windows account. Deleting that
+folder logs you out completely.
 
-**Limite incontournable :** comme pour Discord desktop ou un navigateur, un logiciel malveillant qui
-tourne déjà sous votre session Windows peut lire la session enregistrée. Si vous voulez qu'il n'y ait
-rien à voler, lancez Plume en **mode éphémère** : rien n'est écrit sur le disque, et vous vous
-reconnectez à chaque lancement.
+**Unavoidable limit:** as with Discord desktop or a browser, malware already running under your Windows
+session can read the saved session. If you want nothing to be stealable, run Plume in **ephemeral
+mode**: nothing is written to disk, and you log in again at every launch.
 
 ```powershell
 .\plume.exe --ephemeral
 ```
 
-**Recommandations :** activez la double authentification sur votre compte Discord (idéalement avec une
-clé d'accès, ou *passkey*), gardez Windows à jour, et rangez `plume.exe` dans son propre dossier.
+**Recommendations:** turn on two-factor authentication on your Discord account (ideally with a
+passkey), keep Windows up to date, and keep `plume.exe` in its own folder.
 
-## Recevoir `plume.exe` sans rien installer (GitHub Actions)
+To report a vulnerability in Plume, see [SECURITY.md](SECURITY.md).
 
-Le fichier `.github/workflows/build.yml` fait compiler Plume par les serveurs Windows de GitHub. Votre
-PC n'a alors besoin ni de Rust ni des outils de Visual Studio (plusieurs Go).
+## Getting `plume.exe` without installing anything (GitHub Actions)
 
-1. Créez un dépôt **privé** sur GitHub (par exemple `plume`) et envoyez-y ce dossier.
-2. À chaque envoi, l'onglet **Actions** vérifie le code (format, lint, tests, audit des dépendances,
-   recherche de secrets dans tout l'historique) et compile ; `plume.exe` et son empreinte SHA-256
-   sont téléchargeables dans « Artifacts ». Chaque lundi, l'audit et la recherche de secrets
-   tournent aussi sans envoi : une vulnérabilité découverte entre-temps dans une dépendance fait
-   échouer le passage, et GitHub vous prévient par e-mail.
-3. Pour une version : créez une étiquette `v…` (par exemple `v0.2.0`). Une **Release** est publiée
-   avec `plume.exe` et son empreinte SHA-256.
+The `.github/workflows/build.yml` file has GitHub's Windows servers compile Plume. Your PC then needs
+neither Rust nor the Visual Studio tools (several GB).
 
-Vérifier l'exécutable téléchargé en comparant son empreinte avec le fichier `plume.exe.sha256` publié
-à côté (si le dépôt devient public, GitHub ajoute aussi une attestation de provenance, vérifiable avec
-`gh attestation verify plume.exe --repo DonRosio/plume`) :
+1. Fork this repository (or push a copy to a private repository of your own).
+2. On every push, the **Actions** tab checks the code (format, lint, tests, dependency audit, secret
+   scan over the whole history) and builds; `plume.exe` and its SHA-256 are downloadable under
+   "Artifacts". Every Monday, the audit and the secret scan also run without a push: a vulnerability
+   found in the meantime in a dependency makes the run fail, and GitHub e-mails you.
+3. For a release: create a `v…` tag (for example `v0.2.0`). A **Release** is published with
+   `plume.exe` and its SHA-256.
+
+Check the downloaded executable by comparing its hash with the `plume.exe.sha256` file published next
+to it (on a public repository, GitHub also adds a build-provenance attestation, which you can verify
+with `gh attestation verify plume.exe --repo DonRosio/plume`):
 
 ```powershell
 (Get-FileHash plume.exe -Algorithm SHA256).Hash
 ```
 
-Windows affichera une fois l'avertissement SmartScreen (fichier téléchargé, non signé) : « Informations
-complémentaires » → « Exécuter quand même ». Les actions GitHub utilisées sont épinglées sur une
-empreinte de commit précise, pour qu'une étiquette détournée ne puisse pas changer ce qui s'exécute.
+Windows will show a SmartScreen warning once (downloaded, unsigned file): "More info" → "Run anyway".
+The GitHub actions used are pinned to an exact commit hash, so that a hijacked tag cannot change
+what runs.
 
-## Compiler sous Windows
+## Building on Windows
 
-Prérequis :
-1. Windows 10 ou 11 avec le **Runtime WebView2** (déjà présent sur Windows 11 ; sinon, installez le
-   « Evergreen Runtime » depuis le site de Microsoft).
-2. **Rust** : téléchargez `rustup-init.exe` sur https://rustup.rs et lancez-le. S'il le propose,
-   acceptez l'installation des outils C++ de Visual Studio (nécessaires pour l'édition de liens).
-   Gardez la chaîne d'outils par défaut (`msvc`) : elle produit un `.exe` autonome.
+Prerequisites:
+1. Windows 10 or 11 with the **WebView2 Runtime** (already present on Windows 11; otherwise install
+   the "Evergreen Runtime" from Microsoft's website).
+2. **Rust**: download `rustup-init.exe` from https://rustup.rs and run it. If it offers, accept the
+   installation of the Visual Studio C++ tools (needed for linking). Keep the default toolchain
+   (`msvc`): it produces a standalone `.exe`.
 
-Puis, dans un terminal ouvert dans le dossier `plume` :
+Then, in a terminal opened in the `plume` folder:
 
 ```powershell
 cargo build --release
 ```
 
-L'exécutable est `target\release\plume.exe`, avec l'icône de plume intégrée. Compilez depuis un
-dossier personnel (par exemple `Documents\plume`) : Cargo doit pouvoir écrire dans `target\`.
+The executable is `target\release\plume.exe`, with the feather icon built in. Build from a personal
+folder (for example `Documents\plume`): Cargo must be able to write to `target\`.
 
-Installation : copiez **uniquement** `plume.exe` dans `C:\Program Files\Plume\` (droits
-administrateur demandés une fois ; ce dossier n'est pas modifiable par un programme ordinaire, ce qui
-protège l'exécutable). Lancez-le, puis clic droit sur son icône dans la barre des tâches → « Épingler
-à la barre des tâches ».
+Installation: copy **only** `plume.exe` to `C:\Program Files\Plume\` (administrator rights are asked
+once; this folder cannot be modified by an ordinary program, which protects the executable). Launch
+it, then right click its taskbar icon → "Pin to taskbar".
 
-Facultatif, mais conseillé avant chaque compilation : vérifiez les dépendances.
+Optional, but advised before each build: check the dependencies.
 
 ```powershell
 cargo install cargo-audit
@@ -161,87 +162,93 @@ cargo install cargo-audit
 cargo audit
 ```
 
-Pour contribuer : un hook refuse le commit si un secret est détecté ou si le code n'est pas formaté.
-Il demande [gitleaks](https://github.com/gitleaks/gitleaks#installing) et s'active une fois par
-clone avec `git config core.hooksPath .githooks`.
+To contribute: a hook refuses the commit if a secret is detected or if the code is not formatted.
+It needs [gitleaks](https://github.com/gitleaks/gitleaks#installing) and is enabled once per clone with
+`git config core.hooksPath .githooks`.
 
-## Checklist de test
+## Test checklist
 
-1. **Démarrage** : fond sombre, puis Discord ; connexion par mot de passe + 2FA, QR code ou clé d'accès.
-2. **Relance** : vous êtes toujours connecté ; un second lancement ramène la fenêtre existante.
-3. **Fichiers** : envoyer une pièce jointe ; en télécharger une (la barre de téléchargement apparaît).
-4. **Appel vocal** : vous entendez et on vous entend.
-5. **Partage d'écran.**
-6. **Notifications** quand la fenêtre est réduite.
-7. **Liens** : un lien vers un autre site s'ouvre dans votre navigateur, pas dans Plume.
-8. **Mode éphémère** : avec `--ephemeral`, après fermeture et relance, Discord redemande la connexion.
+1. **Start-up**: dark background, then Discord; log in with password + 2FA, QR code or passkey.
+2. **Relaunch**: you are still logged in; a second launch brings back the existing window.
+3. **Files**: send an attachment; download one (the download bar appears).
+4. **Voice call**: you hear and are heard.
+5. **Screen sharing.**
+6. **Notifications** while the window is minimised.
+7. **Links**: a link to another site opens in your browser, not in Plume.
+8. **Ephemeral mode**: with `--ephemeral`, after closing and relaunching, Discord asks you to log in
+   again.
 
-## Mesurer la mémoire (PowerShell)
+## Measuring memory (PowerShell)
 
-À faire après une dizaine de minutes d'utilisation comparable (mêmes serveurs ouverts).
+Do it after about ten minutes of comparable use (same servers open).
 
-Discord desktop :
-
-```powershell
-"{0:N0} Mo" -f ((Get-Process Discord -ErrorAction SilentlyContinue | Measure-Object PrivateMemorySize64 -Sum).Sum / 1MB)
-```
-
-Plume (le processus `plume.exe` et ses processus WebView2) :
+Discord desktop:
 
 ```powershell
-$ids = @((Get-Process plume).Id) + @(Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -like '*\Plume\*' } | ForEach-Object ProcessId); "{0:N0} Mo" -f ((Get-Process -Id $ids | Measure-Object PrivateMemorySize64 -Sum).Sum / 1MB)
+"{0:N0} MB" -f ((Get-Process Discord -ErrorAction SilentlyContinue | Measure-Object PrivateMemorySize64 -Sum).Sum / 1MB)
 ```
 
-## Mises à jour
+Plume (the `plume.exe` process and its WebView2 processes):
 
-WebView2 se met à jour avec Windows, et l'application web de Discord à chaque chargement. Pour Plume
-lui-même, récupérez la nouvelle Release GitHub (ou recompilez après `cargo audit`). Il n'y a
-volontairement aucune mise à jour automatique, donc aucun canal de mise à jour à pirater.
+```powershell
+$ids = @((Get-Process plume).Id) + @(Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -like '*\Plume\*' } | ForEach-Object ProcessId); "{0:N0} MB" -f ((Get-Process -Id $ids | Measure-Object PrivateMemorySize64 -Sum).Sum / 1MB)
+```
 
-## Démarche
+## Updates
 
-Ce projet est né d'un besoin concret : réduire la mémoire consommée par Discord sur mon PC de jeu,
-pendant mes parties de League of Legends en vocal avec mes amis.
+WebView2 updates with Windows, and Discord's web app at every load. For Plume itself, get the new
+GitHub Release (or rebuild after `cargo audit`). There is deliberately no automatic update, hence no
+update channel to hijack.
 
-Je l'ai conçu et piloté, et je l'ai développé avec l'assistance de **Claude** (Anthropic), utilisé
-comme binôme de programmation. Mon rôle :
+## Approach
 
-- **Définir le besoin et les exigences** : une alternative plus légère que Discord desktop, utilisable
-  avec mon compte existant, et le plus sécurisée possible.
-- **Arbitrer les choix d'architecture.** J'ai d'abord exploré un client entièrement natif, écarté parce
-  qu'il aurait enfreint les conditions d'utilisation de Discord et exposé mon compte. J'ai comparé
-  ensuite plusieurs voies (navigateur, client tiers existant, fenêtre WebView2) avant de retenir
-  WebView2 pour Windows, qui garde les appels vocaux.
-- **Fixer les compromis** : sécurité jamais sacrifiée à la performance, mode éco optionnel plutôt
-  qu'imposé, pas de démarrage automatique avec Windows, pas de rechargement automatique d'une page
-  qui ne répond plus (pour ne pas couper un appel en pleine partie).
-- **Valider sur ma machine Windows** : compilation, fonctionnement, mesures de consommation.
+This project started from a concrete need: reduce the memory Discord uses on my gaming PC, while I
+play League of Legends in voice chat with my friends.
 
-Le code a été écrit avec Claude, puis vérifié : tests unitaires des règles de sécurité, analyse
-statique stricte (clippy), audit des dépendances, compilation et publication automatiques sur GitHub.
-Les principales failles relevées pendant les relectures ont été corrigées : pop-ups capables de
-remplacer la fenêtre, SmartScreen désactivé par défaut dans la bibliothèque wry, DLL piégées.
+I designed and drove it, and developed it with the assistance of **Claude** (Anthropic), used as a
+pair-programming partner. The commits carry a `Co-Authored-By: Claude` trailer for that reason. My
+role:
+
+- **Define the need and the requirements**: a lighter alternative to Discord desktop, usable with my
+  existing account, and as secure as possible.
+- **Decide the architecture.** I first explored a fully native client, ruled out because it would
+  have broken Discord's terms of service and put my account at risk. I then compared several routes
+  (browser, an existing third-party client, a WebView2 window) before choosing WebView2 for Windows,
+  which keeps voice calls.
+- **Set the trade-offs**: security never sacrificed to performance, an optional eco mode rather than
+  an imposed one, no automatic start with Windows, no automatic reload of a page that stops
+  responding (so as not to cut a call in the middle of a game).
+- **Validate on my Windows machine**: build, behaviour, memory measurements.
+
+The code was written with Claude, then checked: unit tests of the security rules, strict static
+analysis (clippy), dependency audit, automatic build and publication on GitHub. The main flaws found
+during reviews were fixed: pop-ups able to replace the window, SmartScreen disabled by default in the
+wry library, booby-trapped DLLs.
 
 ## Code
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| `src/policy.rs` | Toutes les règles de sécurité (navigation, pop-ups, permissions, téléchargements), testées unitairement |
-| `src/app.rs` | Fenêtre, durcissement de WebView2, gestionnaires d'événements, menu de l'icône |
-| `src/badge.rs` | Lecture du nombre de mentions dans le titre et dessin du badge |
-| `src/settings.rs` | Réglages et position de la fenêtre (`%LOCALAPPDATA%\Plume\settings.txt`) |
-| `.github/workflows/build.yml` | Compilation et vérifications automatiques sur GitHub |
-| `src/main.rs` | Point d'entrée |
-| `build.rs`, `assets/plume.ico` | Icône et nom du programme intégrés à `plume.exe` |
+| `src/policy.rs` | All the security rules (navigation, pop-ups, permissions, downloads), unit-tested |
+| `src/app.rs` | Window, WebView2 hardening, event handlers, tray icon menu |
+| `src/badge.rs` | Reading the mention count from the title, and drawing the badge |
+| `src/settings.rs` | Settings and window position (`%LOCALAPPDATA%\Plume\settings.txt`) |
+| `.github/workflows/build.yml` | Automatic build and checks on GitHub |
+| `src/main.rs` | Entry point |
+| `build.rs`, `assets/plume.ico` | Icon and program name embedded in `plume.exe` |
 
-Tests (sous n'importe quel système) :
+Tests (on any system):
 
 ```bash
 cargo test
 ```
 
-Vérification de la compilation pour Windows depuis Linux :
+Checking the Windows build from Linux:
 
 ```bash
 cargo clippy --target x86_64-pc-windows-msvc -- -D warnings
 ```
+
+## License
+
+[MIT](LICENSE).
